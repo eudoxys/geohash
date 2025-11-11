@@ -1,4 +1,4 @@
-"""Geocoding tools"""
+"""Geohash tools"""
 
 import math
 
