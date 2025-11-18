@@ -123,7 +123,7 @@ def haversine_distance(lat1, lon1, lat2, lon2):
          + math.cos(phi1) * math.cos(phi2)
          * math.sin(delta_lam/2) * math.sin(delta_lam/2))
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    return c * 6378.1e3 # radius of earth in km
+    return c * 6378.1 # radius of earth in km
 
 def nearest(gh,ghlist,withdist=False):
     """Find the nearest geohash in a list of geohashes"""
@@ -137,10 +137,12 @@ def nearest2(test_latlon, latlonlist):
     test_lat, test_lon = test_latlon
     best_ix = 0
     best_dist = math.inf
+    best_ll = None
     for _ix,ll in enumerate(latlonlist):
         _lat, _lon = ll[0:2]
         _new_dist = haversine_distance(_lat, _lon, test_lat, test_lon)
         if _new_dist < best_dist:
             best_dist = _new_dist
             best_ix = _ix
-    return best_ix, latlonlist[best_ix], best_dist
+            best_ll = ll
+    return best_ix, best_ll, best_dist
