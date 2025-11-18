@@ -34,9 +34,9 @@ gives the following output
 
 import sys
 try:
-    from .geohash import geohash,geocode
+    from .geohash import geohash,geocode,nearest,nearest2,distance
 except ImportError:
-    from geohash import geohash,geocode
+    from geohash import geohash,geocode,nearest,nearest2,distance
 
 DEBUG=False
 FORMAT="{lat},{lon}"
