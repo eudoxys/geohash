@@ -1,4 +1,10 @@
-# Geohash tools
+# Installation
+
+Install using pip (python installer):
+
+    pip install https://github.com/eudoxys.com/geohash
+    
+# Geohash tool
 
 Syntax: geohash [OPTIONS ...] [CODE|LAT,LON ...]
 
