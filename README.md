@@ -2,7 +2,7 @@
 
 Install using pip (python installer):
 
-    pip install https://github.com/eudoxys.com/geohash
+    pip install git+https://github.com/eudoxys.com/geohash
     
 # Geohash tool
 
