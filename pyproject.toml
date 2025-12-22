@@ -12,7 +12,7 @@ description = "Eudoxys geohash tools"
 readme = "README.md"
 requires-python = ">=3.10"
 keywords = ["eudoxys","geohash"]
-license = "MIT"
+license = {test="MIT"}
 classifiers = [
     "Programming Language :: Python :: 3",
 ]
