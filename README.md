@@ -38,3 +38,7 @@ gives the following output
     32.225646,-115.43884=9mtzm4
 
   
+
+# Acknowledgments
+
+- This material is based on work supported by the U.S. Department of Energy’s Office of Electricity through a grant from the Grid Controls and Communications Division
