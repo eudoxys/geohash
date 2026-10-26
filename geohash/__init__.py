@@ -47,12 +47,30 @@ def main(args=None):
     if args == None:
         args = sys.argv[1:] if len(sys.argv) > 1 else []
 
-    global FORMAT
-    global PRECISION
+    global DEBUG
     if len(args) == 0:
         print("\n".join([x for x in __doc__.split("\n") if x.startswith("Syntax: ")]),file=sys.stderr)
         return 1
 
+    # --debug applies to the whole command, wherever it appears
+    DEBUG = any(arg.split("=",1)[0] in ["-d","--debug"] for arg in args)
+
+    try:
+
+        return _run(args)
+
+    except Exception as err: # pylint: disable=broad-exception-caught
+
+        if DEBUG:
+            raise
+
+        print(f"ERROR [geohash]: {type(err).__name__} {err}",file=sys.stderr)
+        return 9
+
+def _run(args):
+
+    global FORMAT
+    global PRECISION
     for arg in args:
 
         try:
@@ -63,7 +81,7 @@ def main(args=None):
 
         if key in ["-d","--debug"]:
 
-            DEBUG=True
+            pass # handled in main()
 
         elif key in ["-f","--format"]:
 
@@ -91,19 +109,4 @@ def main(args=None):
 
 if __name__ == "__main__":
 
-    # main(["-f={lat:.2f},{lon:.2f}","9mtzm4","32.227887,-115.436076","32.22564697265625,-115.4388427734375"],)
-
-    try:
-
-        rc = main()
-
-    except:
-
-        if DEBUG:
-            raise
-
-        e_name,e_value,e_trace = sys.exc_info()
-        print(f"EXCEPTION: {e_name.__name__} {e_value}")
-        rc = 9
-
-    sys.exit(rc)
+    sys.exit(main())
