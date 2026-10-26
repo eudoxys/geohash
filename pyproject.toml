@@ -1,28 +1,51 @@
 [build-system]
-requires = ["setuptools", "setuptools-scm"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
-
-[project]
-name = "geohash"
-version = "0.0.1"
-authors = [
-    { name = "David P. Chassin", email = "dchassin@eudoxys.com" }
-]
-description = "Eudoxys geohash tools"
-readme = "README.md"
-requires-python = ">=3.10"
-keywords = ["eudoxys","geohash"]
-license = {text="MIT"}
-classifiers = [
-    "Programming Language :: Python :: 3",
-]
-dependencies = [
-]
 
 [tool.setuptools]
 packages = [
     "geohash"
 ]
 
+[tool.setuptools.package-data]
+# list every file pattern the package reads at run time
+geohash = ["*.py"]
+
+[tool.setuptools.dynamic]
+dependencies = {file=["requirements.txt"]}
+
+[project]
+name = "geohash"
+version = "0.0.1"
+description = "Eudoxys geohash tools"
+authors = [
+    { name = "David P. Chassin", email = "dchassin@eudoxys.com" }
+]
+maintainers = [
+    { name = "David P. Chassin", email = "dchassin@eudoxys.com" }
+]
+readme = "README.md"
+requires-python = ">=3.10" # CI python version must satisfy this
+keywords = ["eudoxys","geohash"] # "eudoxys" marks an official Eudoxys release
+license = "MIT"
+license-files = ["LICENSE"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Scientific/Engineering :: GIS",
+    "Topic :: Software Development :: Libraries",
+]
+dynamic = ["dependencies"]
+
+[project.urls]
+Homepage = "https://github.com/eudoxys/geohash"
+Documentation = "https://www.eudoxys.com/geohash"
+Repository = "https://github.com/eudoxys/geohash.git"
+Issues = "https://github.com/eudoxys/geohash/issues"
+
 [project.scripts]
 geohash = "geohash.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["geohash/_test"]
