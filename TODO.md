@@ -5,7 +5,7 @@
 - [x] Latitude, longitude, and precision validated (#6, #21; see `geohash.geohash.geohash`)
 - [x] Distances in km with the mean Earth radius (#7, #22; see `geohash.geohash.EARTH_RADIUS_KM`)
 
-- [ ] Verify and cite the CTA-5009 conformance claim, or remove it (#12)
+- [x] Cite CTA-5009-A and test conformance (#12; see `geohash/_test/test_conformance.py`)
 
 # API
 

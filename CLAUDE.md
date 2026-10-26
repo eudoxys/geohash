@@ -40,6 +40,9 @@ No sibling Eudoxys dependencies; no `cache` package; nothing is downloaded.
   out of range or NaN, precision < 1) or `TypeError` (wrong argument type).
   Coordinates are never wrapped or clamped.
 - A position on a cell boundary belongs to the cell to its south or west.
+- The algorithm is CTA-5009-A's (the Wikipedia "Technical description");
+  `_test/test_conformance.py` checks it against an independent bit-level
+  decoder. Keep it passing when changing `geohash()` or `_decode()`.
 - CLI: an argument containing a comma is `LAT,LON`; anything else is a
   `CODE`. Exit codes are 0 ok, 1 syntax error, 9 exception caught.
 
@@ -79,8 +82,6 @@ examples, so example output must stay exact.
   without bound (documented in "What is not promised"). Tracked in #13.
 - `geocode()` discards the error margins `_decode()` computes, and the CLI
   prints full float precision by default. Tracked in #14.
-- The CTA-5009 conformance claim has no citation or conformance tests.
-  Tracked in #12.
 - `cli.py` sets argparse's private `_negative_number_matcher` so negative
   `LAT,LON` arguments are positional; check it on new Python versions.
 - Dead commented-out formatting code remains in `geocode()`.

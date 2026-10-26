@@ -49,7 +49,13 @@ A geohash code names a rectangular cell of latitude and longitude. Each
 character of the code, from the alphabet `0123456789bcdefghjkmnpqrstuvwxyz`,
 adds 5 bits that alternately halve the cell in longitude and latitude, so
 longer codes name smaller cells and every code is a prefix of the codes of
-the cells inside it. The geohash tools conform to standard CTA-5009.
+the cells inside it. This is the geohash algorithm of CTA-5009-A, *Fast
+and Readable Geographical Hashing* (Consumer Technology Association,
+https://shop.cta.tech/products/cta-5009), which adopts the "Technical
+description" of the Wikipedia Geohash article
+(https://en.wikipedia.org/wiki/Geohash); `geohash/_test/test_conformance.py`
+checks the alphabet, bit interleaving, interval halving, decoding to the cell
+center, the cell sizes, and the article's worked examples.
 
 The `geohash` command converts each `CODE` to `LAT,LON` and each `LAT,LON` to
 `CODE`, and prints one line per argument, in order, as `ARGUMENT=RESULT`.
@@ -101,6 +107,10 @@ What is not promised
     need not share a prefix: neighbors across a cell boundary, the equator,
     the prime meridian, or the antimeridian can have entirely different
     codes. There are no neighbor or bounding-box functions.
+
+  - Conformance to CTA-5009-A covers the encoding and decoding algorithm
+    only. The boundary rule (south or west), the input checks, the case
+    handling, and the distance functions are choices of this package.
 
   - Coordinates are not wrapped or clamped: a latitude outside [-90, 90] or a
     longitude outside [-180, 180] is an error.
