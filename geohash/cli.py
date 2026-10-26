@@ -36,8 +36,9 @@ E_OK = 0
 E_SYNTAX = 1
 E_EXCEPTION = 9
 
-# a LAT,LON argument, possibly with a leading minus sign
-_LATLON = r"-?\d*\.?\d+(?:[eE][-+]?\d+)?,-?\d*\.?\d+(?:[eE][-+]?\d+)?"
+# an argument that looks like a negative LAT,LON (e.g. -32.2,115.4); it is a
+# location, not an option (geohash codes never contain a comma)
+_NEGATIVE_LATLON = r"-\.?\d[^,]*,.*"
 
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="geohash",
@@ -60,12 +61,26 @@ def _parser() -> argparse.ArgumentParser:
     # positional arguments rather than unrecognized options. argparse has no
     # public hook for this; it already does the same for plain negative numbers.
     parser._negative_number_matcher = re.compile( # pylint: disable=protected-access
-        rf"^-\d+$|^-\d*\.\d+$|^{_LATLON}$")
+        rf"^-\d+$|^-\d*\.\d+$|^{_NEGATIVE_LATLON}$")
     return parser
 
+def _parse_latlon(location:str) -> tuple[float,float]:
+    """Return the latitude and longitude in a `LAT,LON` argument. Raises
+    `ValueError` if it is not exactly two numbers separated by a comma.
+    """
+    parts = location.split(",")
+    try:
+        if len(parts) != 2:
+            raise ValueError
+        lat,lon = (float(x) for x in parts)
+    except ValueError:
+        raise ValueError(f"invalid LAT,LON {location!r}: expected two numbers "
+            "separated by a comma") from None
+    return lat,lon
+
 def _convert(location:str, precision:int, fmt:str) -> str:
-    if re.fullmatch(_LATLON,location):
-        lat,lon = (float(x) for x in location.split(","))
+    if "," in location: # geohash codes never contain a comma
+        lat,lon = _parse_latlon(location)
         return f"{location}={geohash(lat,lon,precision)}"
     lat,lon = geocode(location)
     return f"{location}={fmt.format(lat=lat,lon=lon)}"

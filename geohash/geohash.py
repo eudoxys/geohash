@@ -1,6 +1,7 @@
 """Geohash library"""
 
 import math
+import numbers
 
 #
 # Geographic location encoding/decoding
@@ -87,10 +88,37 @@ def geocode(gh):
     _cache[gh] = (float(lat), float(lon))
     return float(lat), float(lon)
 
+def _check_coordinate(name, value, limit):
+    """Return `value` as a float after checking that it is a finite real
+    number in [-`limit`, `limit`]. Raises `TypeError` if `value` is not a
+    real number and `ValueError` if it is NaN or out of range.
+    """
+    if isinstance(value, bool) or not isinstance(value, numbers.Real):
+        raise TypeError(f"{name} must be a real number, "
+            f"not {type(value).__name__}")
+    value = float(value)
+    if not -limit <= value <= limit: # also rejects NaN
+        raise ValueError(f"{name} {value!r} is outside [-{limit}, {limit}]")
+    return value
+
 def geohash(latitude, longitude, precision=6):
     """Encode a position given in float arguments latitude, longitude to
     a geohash which will have the character count precision.
+
+    Example: `geohash(32.225646,-115.43884)` returns `"9mtzm4"`.
+
+    Raises `ValueError` if `latitude` is outside [-90, 90], `longitude` is
+    outside [-180, 180] (coordinates are not wrapped), either is NaN, or
+    `precision` is less than 1, and `TypeError` if a coordinate is not a
+    real number or `precision` is not an integer.
     """
+    latitude = _check_coordinate("latitude", latitude, 90)
+    longitude = _check_coordinate("longitude", longitude, 180)
+    if isinstance(precision, bool) or not isinstance(precision, numbers.Integral):
+        raise TypeError(f"precision must be an int, "
+            f"not {type(precision).__name__}")
+    if precision < 1:
+        raise ValueError(f"precision must be positive, got {precision}")
     __base32 = '0123456789bcdefghjkmnpqrstuvwxyz'
     __decodemap = { }
     for i,c in enumerate(__base32):
