@@ -6,6 +6,8 @@ how to report problems, propose changes, and submit pull requests.
 
 Read the [README](README.md) for what the package does, and the
 [documentation](https://www.eudoxys.com/geohash) for how to use it.
+Maintainers and AI assistants should also read [CLAUDE.md](CLAUDE.md) and
+[MANIFEST.md](MANIFEST.md).
 
 ## Code of conduct
 
