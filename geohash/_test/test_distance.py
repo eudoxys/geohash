@@ -4,8 +4,8 @@ import math
 
 import pytest
 
-from geohash.geohash import (haversine_distance, distance, geocode,
-    nearest, nearest2, EARTH_RADIUS_KM)
+from geohash._core import (haversine_distance, distance, geocode,
+    nearest, nearest_latlon, EARTH_RADIUS_KM)
 
 def test_radius_is_mean_earth_radius_km():
     assert EARTH_RADIUS_KM == 6371.0
@@ -39,7 +39,7 @@ def test_nearest_withdist_km():
     _, dist = nearest("9q8yyk", ["dr5reg"], withdist=True)
     assert 4100 < dist < 4160
 
-def test_nearest2_km():
-    ix, ll, dist = nearest2((0.0, 0.0), [(0.0, 2.0), (0.0, 1.0)])
+def test_nearest_latlon_km():
+    ix, ll, dist = nearest_latlon((0.0, 0.0), [(0.0, 2.0), (0.0, 1.0)])
     assert ix == 1 and ll == (0.0, 1.0)
     assert dist == pytest.approx(111.195, abs=1e-3)

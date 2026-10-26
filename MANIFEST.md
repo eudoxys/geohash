@@ -8,13 +8,13 @@ Update this file in the same PR that adds, moves, or deletes a file.
 
 1. `CLAUDE.md` — conventions, rough edges, and working rules
 2. `geohash/__init__.py` — package docs (the specification) and public API
-3. `geohash/geohash.py` — encoding, decoding, and distances
+3. `geohash/_core.py` — encoding, decoding, and distances (private module)
 4. `geohash/cli.py` — the `geohash` command
 
 ## Task index
 
-- Change encoding/decoding or distances: `geohash/geohash.py`; tests in `geohash/_test/test_conformance.py`, `test_roundtrip.py`, `test_geohash.py`, `test_decode.py`, `test_distance.py`
-- Add or change a public function: `geohash/geohash.py` (docstring with example output); re-export in `geohash/__init__.py`; update the package docstring and `README.md`
+- Change encoding/decoding or distances: `geohash/_core.py`; tests in `geohash/_test/test_conformance.py`, `test_roundtrip.py`, `test_geohash.py`, `test_decode.py`, `test_distance.py`
+- Add or change a public function: `geohash/_core.py` (docstring with example output); import and add to `__all__` in `geohash/__init__.py`, and to `PUBLIC` in `geohash/_test/test_api.py`; update the package docstring and `README.md`
 - Add a CLI option: `geohash/cli.py`, `geohash/__init__.py` Syntax section, `README.md`; test in `geohash/_test/test_cli.py`
 - Fix a docstring example: `geohash/_test/test_docs.py` runs them; output must match exactly
 - Update docs: `make docs` (output in `docs/`, not committed)
@@ -24,8 +24,8 @@ Update this file in the same PR that adds, moves, or deletes a file.
 
 | Path | Purpose | Notes |
 |---|---|---|
-| `geohash/__init__.py` | package docs, re-exports, `__version__` | pdoc landing page; doctested by `_test/test_docs.py` |
-| `geohash/geohash.py` | `geohash()`, `geocode()`, `distance()`, `distance2()`, `haversine_distance()`, `nearest()`, `nearest2()` | tested by `test_roundtrip.py`, `test_geohash.py`, `test_decode.py`, `test_distance.py` |
+| `geohash/__init__.py` | package docs, public API (`__all__`), `__version__` | pdoc landing page; doctested by `_test/test_docs.py` |
+| `geohash/_core.py` | `geohash()`, `geocode()`, `distance()`, `haversine_distance()`, `nearest()`, `nearest_latlon()` | private; tested by `test_api.py`, `test_roundtrip.py`, `test_geohash.py`, `test_decode.py`, `test_distance.py` |
 | `geohash/cli.py` | CLI `main()` | entry point `geohash`; tested by `_test/test_cli.py` |
 
 ## Tests
@@ -33,7 +33,7 @@ Update this file in the same PR that adds, moves, or deletes a file.
 | Path | Purpose | Notes |
 |---|---|---|
 | `geohash/_test/README.md` | how to run tests, what each file checks | |
-| `geohash/_test/conftest.py` | clears the `geocode()` memo before each test | no cache dir; nothing downloaded |
+| `geohash/_test/conftest.py` | clears the `geocode()` memo (`_core._geocode`) before each test | no cache dir; nothing downloaded |
 | `geohash/_test/test_*.py` | tests | all fast; no `network` marker |
 
 ## Repository

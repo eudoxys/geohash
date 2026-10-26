@@ -5,9 +5,9 @@ import importlib
 
 import pytest
 
-# importlib, because the package attribute `geohash.geohash` is the function
-# re-exported by the package, not the module of the same name
-MODULES = ["geohash", "geohash.geohash", "geohash.cli"]
+# the public functions are documented and doctested in the private
+# `geohash._core` module that defines them
+MODULES = ["geohash", "geohash._core", "geohash.cli"]
 
 @pytest.mark.parametrize("name", MODULES)
 def test_docstring_examples(name):

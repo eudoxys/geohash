@@ -63,7 +63,7 @@ An argument containing a comma is a `LAT,LON`; anything else is a `CODE`.
 Processing stops at the first argument that fails.
 
 Given a latitude in [-90, 90] degrees, a longitude in [-180, 180] degrees, and
-a precision $n \\ge 1$, `geohash.geohash.geohash()` returns a code that is
+a precision $n \\ge 1$, `geohash()` returns a code that is
 expected to satisfy:
 
   1. **Shape.** The code is a lowercase string of exactly $n$ characters from
@@ -78,7 +78,7 @@ expected to satisfy:
 
   4. **Repeatability.** The same arguments always give the same code.
 
-Given a code, `geohash.geohash.geocode()` returns the latitude and longitude
+Given a code, `geocode()` returns the latitude and longitude
 in degrees of the center of its cell, so that:
 
   1. **Round trip.** `geocode(geohash(lat, lon, n))` differs from
@@ -87,11 +87,19 @@ in degrees of the center of its cell, so that:
 
   2. **Case.** Uppercase, lowercase and mixed-case codes decode alike.
 
-Given two codes, `geohash.geohash.distance()` returns the great-circle
-distance in km between their cell centers on a sphere of radius
-`geohash.geohash.EARTH_RADIUS_KM`; it is non-negative, symmetric, and zero
-for equal codes. `geohash.geohash.nearest()` and `geohash.geohash.nearest2()`
-pick the closest entry of a list by that distance.
+Given two codes, `distance()` returns the great-circle distance in km
+between their cell centers on a sphere of radius `EARTH_RADIUS_KM`; it is
+non-negative, symmetric, and zero for equal codes. `haversine_distance()`
+gives the same distance between two latitude/longitude positions.
+`nearest()` picks the code in a list closest to a code by `distance()`, and
+`nearest_latlon()` picks the position in a list closest to a position by
+`haversine_distance()`.
+
+The public names are `geohash()`, `geocode()`, `distance()`,
+`haversine_distance()`, `nearest()`, `nearest_latlon()`, `EARTH_RADIUS_KM`,
+`GEOCODE_CACHE_SIZE`, and the CLI entry point `main()`; import them from the
+package (e.g. `from geohash import geocode`). `geohash.geohash` is the
+`geohash()` function; the implementation module is private.
 
 Invalid input raises `ValueError` (codes that are empty or contain a
 character outside the alphabet, coordinates out of range or NaN, precision
@@ -122,11 +130,9 @@ What is not promised
   - Beyond about 22 characters the code resolves finer than a 64-bit float
     coordinate, so further characters carry no information.
 
-  - `geohash.geohash.distance2()` is a squared difference in degrees, not a
-    distance; it ignores the convergence of meridians and the antimeridian.
-
-  - `geohash.geohash.geocode()` remembers every code it decodes for the life of
-    the process, so memory grows with the number of distinct codes decoded.
+  - The empty-list results differ by function: `nearest()` returns `None`
+    (or `(None, nan)` with `withdist=True`) and `nearest_latlon()` returns
+    `(None, None, nan)`.
 
 Data
 ----
@@ -151,6 +157,7 @@ flowchart LR
     latlon["LAT,LON (deg)"] -- geohash --> code[CODE]
     code -- geocode --> center["cell center LAT,LON (deg)"]
     code -- distance, nearest --> km[great-circle km]
+    latlon -- haversine_distance, nearest_latlon --> km
 ```
 
 Examples
@@ -193,5 +200,9 @@ try:
 except Exception: # pylint: disable=broad-exception-caught
     __version__ = "dev"
 
-from .geohash import geohash,geocode,nearest,nearest2,distance
+from ._core import (geohash,geocode,distance,haversine_distance,nearest,
+    nearest_latlon,EARTH_RADIUS_KM,GEOCODE_CACHE_SIZE)
 from .cli import main
+
+__all__ = ["geohash","geocode","distance","haversine_distance","nearest",
+    "nearest_latlon","EARTH_RADIUS_KM","GEOCODE_CACHE_SIZE","main"]

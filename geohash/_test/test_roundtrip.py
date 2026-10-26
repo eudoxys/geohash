@@ -4,7 +4,7 @@ import math
 
 import pytest
 
-from geohash.geohash import geohash, geocode, nearest2, _decode
+from geohash._core import geohash, geocode, nearest_latlon, _decode
 
 # (code, latitude, longitude) of known cells; the point is inside the cell
 REFERENCE = [
@@ -65,11 +65,11 @@ def test_uppercase_roundtrip():
     code = geohash(42.6,-5.6,5)
     assert geocode(code.upper()) == geocode(code)
 
-def test_nearest2_empty():
-    ix,ll,dist = nearest2((0.0,0.0),[])
-    assert (ix,ll) == (0,None) and math.isinf(dist)
+def test_nearest_latlon_empty():
+    ix,ll,dist = nearest_latlon((0.0,0.0),[])
+    assert (ix,ll) == (None,None) and math.isnan(dist)
 
-def test_nearest2_extra_fields():
+def test_nearest_latlon_extra_fields():
     # entries may carry fields beyond lat,lon; the whole entry is returned
     entries = [(10.0,10.0,"far"),(0.0,0.5,"near")]
-    assert nearest2((0.0,0.0),entries)[:2] == (1,(0.0,0.5,"near"))
+    assert nearest_latlon((0.0,0.0),entries)[:2] == (1,(0.0,0.5,"near"))

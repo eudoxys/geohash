@@ -1,7 +1,7 @@
 """Tests for geohash.nearest()"""
 
 import math
-from geohash.geohash import geohash, distance, nearest
+from geohash._core import geohash, distance, nearest
 
 def test_nearest_uses_great_circle_distance():
     # At 60N a degree of longitude is about half a degree of latitude, so the

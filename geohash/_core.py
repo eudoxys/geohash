@@ -1,18 +1,17 @@
-"""Geohash encoding, decoding, and distances
+"""@private Geohash encoding, decoding, and distances
+
+This module is private: import its public names from the package
+(`from geohash import geohash, geocode, ...`), which documents them.
 
 Latitudes and longitudes are in degrees (north and east positive) and
 distances are in km. Codes use the geohash alphabet
 `0123456789bcdefghjkmnpqrstuvwxyz`; they are returned in lowercase and
 accepted in any case.
 
-The public functions are re-exported by the package, except
-`distance2()` and `haversine_distance()`, which are imported from
-`geohash.geohash`.
-
 Examples
 --------
 
-    >>> from geohash import geohash, geocode, distance, nearest, nearest2
+    >>> from geohash import geohash, geocode, distance, nearest, nearest_latlon
     >>> geohash(32.225646, -115.43884)
     '9mtzm4'
     >>> geohash(32.225646, -115.43884, precision=8)
@@ -23,20 +22,8 @@ Examples
     4128.5
     >>> nearest("9q8yyk", ["dr5reg", "9q5ctr", "c23nb6"])
     '9q5ctr'
-    >>> nearest2((37.7749, -122.4194), [(40.7128, -74.0060), (34.0522, -118.2437)])
+    >>> nearest_latlon((37.7749, -122.4194), [(40.7128, -74.0060), (34.0522, -118.2437)])
     (1, (34.0522, -118.2437), 559.120577061553)
-
-Caveats
--------
-
-  - Decoding returns the center of the code's cell, not the position that
-    was encoded; see the cell size table in the package documentation.
-
-  - Close positions need not share a code prefix, e.g. across the equator,
-    the prime meridian, or the antimeridian.
-
-  - Distances are great-circle distances on a sphere of radius
-    `EARTH_RADIUS_KM`.
 
 References
 ----------
@@ -53,18 +40,24 @@ References
   - Haversine formula, https://en.wikipedia.org/wiki/Haversine_formula
 """
 
+import functools
 import math
 import numbers
+from collections.abc import Sequence
 
 #
 # Geographic location encoding/decoding
 #
-_cache = {}
-
 _BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz'
 _DECODEMAP = {c:i for i,c in enumerate(_BASE32)}
+_BITS = (16, 8, 4, 2, 1)
 
-def _normalize(gh):
+GEOCODE_CACHE_SIZE = 4096
+"""Number of most recently decoded codes `geocode()` remembers. Decoding is
+cheap, so this only saves repeated work in loops such as `nearest()`; it
+bounds the memory used by the memo."""
+
+def _normalize(gh:str) -> str:
     """Return the geohash `gh` in lowercase after checking that it is a
     non-empty string of geohash base32 characters. Raises `TypeError` if
     `gh` is not a string and `ValueError` if it is empty or contains a
@@ -81,7 +74,7 @@ def _normalize(gh):
                 f"at position {pos} in {gh!r}")
     return code
 
-def _decode(gh):
+def _decode(gh:str) -> tuple[float,float,float,float]:
     """
     Decode the geohash to its exact values, including the error
     margins of the result.  Returns four float values: latitude,
@@ -96,7 +89,7 @@ def _decode(gh):
     is_even = True
     for c in gh:
         cd = _DECODEMAP[c]
-        for mask in [16, 8, 4, 2, 1]:
+        for mask in _BITS:
             if is_even: # adds longitude info
                 lon_err /= 2
                 if cd & mask:
@@ -114,7 +107,14 @@ def _decode(gh):
     lon = (lon_interval[0] + lon_interval[1]) / 2
     return lat, lon, lat_err, lon_err
 
-def geocode(gh):
+@functools.lru_cache(maxsize=GEOCODE_CACHE_SIZE)
+def _geocode(code:str) -> tuple[float,float]:
+    """Return the cell center of the normalized (valid, lowercase) `code`,
+    memoized for the `GEOCODE_CACHE_SIZE` most recently used codes."""
+    lat, lon, _, _ = _decode(code)
+    return float(lat), float(lon)
+
+def geocode(gh:str) -> tuple[float,float]:
     """Decode a geohash code to the center of its cell
 
     Arguments
@@ -152,23 +152,12 @@ def geocode(gh):
       - The full floating-point center is returned; round it for display
         (e.g. with the CLI `--format` option).
 
-      - Results are remembered for the life of the process, so memory grows
-        with the number of distinct codes decoded.
+      - The `GEOCODE_CACHE_SIZE` most recently decoded codes are remembered,
+        so memory used by the memo is bounded.
     """
-    gh = _normalize(gh)
-    if gh in _cache:
-        return _cache[gh][0],_cache[gh][1]
-    lat, lon, _, _ = _decode(gh)
-    # from math import log10
-    # # Format to the number of decimals that are known
-    # lats = "%.*f" % (max(1, int(round(-log10(lat_err)))) - 1, lat)
-    # lons = "%.*f" % (max(1, int(round(-log10(lon_err)))) - 1, lon)
-    # if '.' in lats: lats = lats.rstrip('0')
-    # if '.' in lons: lons = lons.rstrip('0')
-    _cache[gh] = (float(lat), float(lon))
-    return float(lat), float(lon)
+    return _geocode(_normalize(gh))
 
-def _check_coordinate(name, value, limit):
+def _check_coordinate(name:str, value:float, limit:float) -> float:
     """Return `value` as a float after checking that it is a finite real
     number in [-`limit`, `limit`]. Raises `TypeError` if `value` is not a
     real number and `ValueError` if it is NaN or out of range.
@@ -181,7 +170,7 @@ def _check_coordinate(name, value, limit):
         raise ValueError(f"{name} {value!r} is outside [-{limit}, {limit}]")
     return value
 
-def geohash(latitude, longitude, precision=6):
+def geohash(latitude:float, longitude:float, precision:int=6) -> str:
     """Encode a latitude and longitude as a geohash code
 
     Arguments
@@ -231,13 +220,8 @@ def geohash(latitude, longitude, precision=6):
             f"not {type(precision).__name__}")
     if precision < 1:
         raise ValueError(f"precision must be positive, got {precision}")
-    __base32 = '0123456789bcdefghjkmnpqrstuvwxyz'
-    __decodemap = { }
-    for i,c in enumerate(__base32):
-        __decodemap[c] = i
     lat_interval, lon_interval = (-90.0, 90.0), (-180.0, 180.0)
     gh = []
-    bits = [ 16, 8, 4, 2, 1 ]
     bit = 0
     ch = 0
     even = True
@@ -245,14 +229,14 @@ def geohash(latitude, longitude, precision=6):
         if even:
             mid = (lon_interval[0] + lon_interval[1]) / 2
             if longitude > mid:
-                ch |= bits[bit]
+                ch |= _BITS[bit]
                 lon_interval = (mid, lon_interval[1])
             else:
                 lon_interval = (lon_interval[0], mid)
         else:
             mid = (lat_interval[0] + lat_interval[1]) / 2
             if latitude > mid:
-                ch |= bits[bit]
+                ch |= _BITS[bit]
                 lat_interval = (mid, lat_interval[1])
             else:
                 lat_interval = (lat_interval[0], mid)
@@ -260,7 +244,7 @@ def geohash(latitude, longitude, precision=6):
         if bit < 4:
             bit += 1
         else:
-            gh += __base32[ch]
+            gh.append(_BASE32[ch])
             bit = 0
             ch = 0
     return ''.join(gh)
@@ -272,7 +256,7 @@ Distances computed with it can differ from ellipsoidal (geodesic)
 distances by up to about 0.5%. For a different radius `R`, multiply the
 result by `R / EARTH_RADIUS_KM`."""
 
-def distance(a,b):
+def distance(a:str,b:str) -> float:
     """Great-circle distance between two geohash codes
 
     Arguments
@@ -312,46 +296,7 @@ def distance(a,b):
     lat2,lon2 = geocode(b)
     return haversine_distance(lat1, lon1, lat2, lon2)
 
-def distance2(a,b):
-    """Squared coordinate difference between two geohash codes
-
-    Arguments
-    ---------
-
-      - `a`: first geohash code (`str`, case-insensitive)
-
-      - `b`: second geohash code (`str`, case-insensitive)
-
-    Returns
-    -------
-
-      - `float`: $(\\Delta\\text{lat})^2 + (\\Delta\\text{lon})^2$ between the
-        cell centers, in square degrees
-
-    Raises `ValueError` or `TypeError` for an invalid code (see
-    `geocode()`).
-
-    Examples
-    --------
-
-        >>> from geohash.geohash import distance2
-        >>> distance2("9q8yyk", "dr5reg")
-        2351.7545644193888
-
-    Caveats
-    -------
-
-      - This is not a distance: a degree of longitude is treated as equal to
-        a degree of latitude at every latitude, and longitudes are not
-        wrapped at the antimeridian. Use `distance()` for km.
-    """
-
-    x0,y0 = geocode(a)
-    x1,y1 = geocode(b)
-    dx,dy = x0-x1,y0-y1
-    return dx*dx+dy*dy
-
-def haversine_distance(lat1, lon1, lat2, lon2):
+def haversine_distance(lat1:float, lon1:float, lat2:float, lon2:float) -> float:
     """Great-circle distance between two positions
 
     Arguments
@@ -374,7 +319,6 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     Examples
     --------
 
-        >>> from geohash.geohash import haversine_distance
         >>> haversine_distance(0, 0, 0, 1)  # one degree along the equator
         111.19492664455873
 
@@ -397,8 +341,10 @@ def haversine_distance(lat1, lon1, lat2, lon2):
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
     return c * EARTH_RADIUS_KM
 
-def nearest(gh,ghlist,withdist=False):
+def nearest(gh:str,ghlist:Sequence[str],withdist:bool=False) -> str|None|tuple[str|None,float]:
     """Find the geohash code in a list nearest to a given code
+
+    Use `nearest_latlon()` to search latitude/longitude positions instead.
 
     Arguments
     ---------
@@ -441,15 +387,18 @@ def nearest(gh,ghlist,withdist=False):
     if len(ghlist) > 0:
         best = min(((x,distance(gh,x)) for x in ghlist),key=lambda y:y[1])
         return best if withdist else best[0]
-    return (None,float('nan')) if withdist else None
+    return (None,math.nan) if withdist else None
 
-def nearest2(test_latlon, latlonlist):
+def nearest_latlon(latlon:Sequence[float],
+        latlonlist:Sequence[Sequence]) -> tuple[int|None,object,float]:
     """Find the position in a list nearest to a given position
+
+    Use `nearest()` to search geohash codes instead.
 
     Arguments
     ---------
 
-      - `test_latlon`: latitude and longitude in degrees to search from
+      - `latlon`: latitude and longitude in degrees to search from
 
       - `latlonlist`: positions to search; each entry's first two items are
         its latitude and longitude in degrees, and further items are ignored
@@ -459,17 +408,19 @@ def nearest2(test_latlon, latlonlist):
 
       - `tuple[int,object,float]`: the index of the nearest entry in
         `latlonlist`, the entry itself, and its great-circle distance in km
-        (see `haversine_distance()`); `(0, None, inf)` if `latlonlist` is
-        empty
+        (see `haversine_distance()`); `(None, None, nan)` if `latlonlist`
+        is empty
 
     Examples
     --------
 
-        >>> nearest2((37.7749, -122.4194),
+        >>> nearest_latlon((37.7749, -122.4194),
         ...     [(40.7128, -74.0060), (34.0522, -118.2437)])
         (1, (34.0522, -118.2437), 559.120577061553)
-        >>> nearest2((0, 0), [])
-        (0, None, inf)
+        >>> nearest_latlon((0, 0), [(10, 0, "a"), (1, 0, "b")])
+        (1, (1, 0, 'b'), 111.19492664455873)
+        >>> nearest_latlon((0, 0), [])
+        (None, None, nan)
 
     Caveats
     -------
@@ -480,15 +431,12 @@ def nearest2(test_latlon, latlonlist):
 
       - Of entries at equal distance, the first in `latlonlist` is returned.
     """
-    test_lat, test_lon = test_latlon
-    best_ix = 0
+    lat, lon = latlon
+    best_ix = None
     best_dist = math.inf
     best_ll = None
-    for _ix,ll in enumerate(latlonlist):
-        _lat, _lon = ll[0:2]
-        _new_dist = haversine_distance(_lat, _lon, test_lat, test_lon)
-        if _new_dist < best_dist:
-            best_dist = _new_dist
-            best_ix = _ix
-            best_ll = ll
-    return best_ix, best_ll, best_dist
+    for ix,ll in enumerate(latlonlist):
+        dist = haversine_distance(ll[0], ll[1], lat, lon)
+        if dist < best_dist:
+            best_ix, best_ll, best_dist = ix, ll, dist
+    return (best_ix, best_ll, best_dist) if best_ix is not None else (None, None, math.nan)
