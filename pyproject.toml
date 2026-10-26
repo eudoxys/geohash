@@ -25,4 +25,4 @@ packages = [
 ]
 
 [project.scripts]
-geohash = "geohash:main"
+geohash = "geohash.cli:main"
