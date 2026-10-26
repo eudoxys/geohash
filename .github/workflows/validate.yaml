@@ -1,0 +1,62 @@
+name: Validation
+
+# Run only when code, tests, or packaging change
+on:
+  push:
+    branches: [ main ]
+    paths: &paths
+      - "geohash/**"
+      - "!geohash/_explore/**"
+      - "!geohash/_review/**"
+      - "!geohash/_validate/**"
+      - "!**/*.md"
+      - "requirements.txt"
+      - "pyproject.toml"
+      - ".github/workflows/validate.yaml"
+  pull_request:
+    branches: [ main ]
+    paths: *paths
+  workflow_dispatch:
+
+# A newer push to the same branch/PR cancels the run in progress
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10 # tests take seconds; no downloads
+
+    strategy:
+      fail-fast: false
+      matrix:
+        # the oldest version allowed by requires-python (">=3.10") and a current one
+        python-version: [ "3.10", "3.13" ]
+
+    # geohash downloads nothing, so there is no data cache step and no
+    # GEOHASH_CACHEDIR
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+        cache: pip
+        cache-dependency-path: requirements.txt
+
+    - name: Install packages
+      run: |
+        pip install --upgrade pip
+        pip install . pytest pylint   # non-editable: catches missing package-data
+
+    - name: Analyse code
+      run: |
+        cd geohash
+        pylint --fail-under 0 *.py
+
+    - name: Run tests
+      run: |
+        pytest --durations=10

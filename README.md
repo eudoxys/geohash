@@ -1,3 +1,5 @@
+[![Validation](https://github.com/eudoxys/geohash/actions/workflows/validate.yaml/badge.svg)](https://github.com/eudoxys/geohash/actions/workflows/validate.yaml)
+
 # Installation
 
 Install using Eudoxys Package Manager:
@@ -66,6 +68,13 @@ gives the following output
     9mtzm4=32.2256,-115.4388
 
   
+
+# Testing
+
+    pip install . pytest
+    pytest
+
+See [geohash/_test/README.md](geohash/_test/README.md) for what each test file checks.
 
 # Acknowledgments
 
