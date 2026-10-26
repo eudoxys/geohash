@@ -128,8 +128,8 @@ def haversine_distance(lat1, lon1, lat2, lon2):
 def nearest(gh,ghlist,withdist=False):
     """Find the nearest geohash in a list of geohashes"""
     if len(ghlist) > 0:
-        dist = sorted([(x,distance2(gh,x)) for x in ghlist],key=lambda y:y[1])
-        return (dist[0][0],distance(gh,dist[0][0])) if withdist else dist[0][0]
+        best = min(((x,distance(gh,x)) for x in ghlist),key=lambda y:y[1])
+        return best if withdist else best[0]
     return (None,float('nan')) if withdist else None
 
 def nearest2(test_latlon, latlonlist):
