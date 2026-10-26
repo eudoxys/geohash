@@ -13,7 +13,7 @@ Update this file in the same PR that adds, moves, or deletes a file.
 
 ## Task index
 
-- Change encoding/decoding or distances: `geohash/geohash.py`; tests in `geohash/_test/test_roundtrip.py`, `test_geohash.py`, `test_decode.py`, `test_distance.py`
+- Change encoding/decoding or distances: `geohash/geohash.py`; tests in `geohash/_test/test_conformance.py`, `test_roundtrip.py`, `test_geohash.py`, `test_decode.py`, `test_distance.py`
 - Add or change a public function: `geohash/geohash.py` (docstring with example output); re-export in `geohash/__init__.py`; update the package docstring and `README.md`
 - Add a CLI option: `geohash/cli.py`, `geohash/__init__.py` Syntax section, `README.md`; test in `geohash/_test/test_cli.py`
 - Fix a docstring example: `geohash/_test/test_docs.py` runs them; output must match exactly

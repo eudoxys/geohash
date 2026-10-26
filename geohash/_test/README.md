@@ -30,6 +30,17 @@ with extra fields.
 
 	pytest geohash/_test/test_roundtrip.py
 
+test_conformance.py
+-------------------
+
+Conformance to CTA-5009-A, which adopts the Wikipedia "Geohash" technical
+description: the alphabet and 5-bit values, longitude/latitude bit
+interleaving, interval halving, decoding to the cell center (checked against
+an independent bit-level decoder on random codes), the `ezs42` and
+`u4pruydqqvj` worked examples, and the cell-size table.
+
+	pytest geohash/_test/test_conformance.py
+
 test_geohash.py
 ---------------
 

@@ -4,8 +4,9 @@
 Eudoxys geohash tools
 
 `geohash` encodes latitude/longitude positions as geohash codes and decodes
-codes back to the latitude and longitude of their cell centers, following
-standard CTA-5009. It also gives great-circle distances in km between codes
+codes back to the latitude and longitude of their cell centers, using the
+geohash algorithm of [CTA-5009-A](https://shop.cta.tech/products/cta-5009),
+*Fast and Readable Geographical Hashing*. It also gives great-circle distances in km between codes
 and finds the nearest code or position in a list. It provides a `geohash`
 command and a Python API for anyone who needs compact, prefix-nested location
 keys, and has no third-party dependencies.

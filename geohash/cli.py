@@ -46,7 +46,7 @@ _NEGATIVE_LATLON = r"-\.?\d[^,]*,.*"
 def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="geohash",
         description="Convert each CODE to LAT,LON and each LAT,LON to CODE, "
-            "and output the results line by line. Conforms to CTA-5009.",
+            "and output the results line by line. Uses the geohash algorithm of CTA-5009-A.",
         epilog="Exit codes: 0 ok, 1 syntax error, 9 exception caught "
             "(use --debug to see traceback). "
             "See https://www.eudoxys.com/geohash for full documentation.")

@@ -41,7 +41,12 @@ Caveats
 References
 ----------
 
-  - Consumer Technology Association, standard CTA-5009.
+  - Consumer Technology Association, CTA-5009-A, *Fast and Readable
+    Geographical Hashing*, https://shop.cta.tech/products/cta-5009 (free);
+    it adopts the algorithm in the "Technical description" section of the
+    Wikipedia Geohash article. The original CTA-5009 is the reference for
+    the `geohash` claim (key 282) in the IANA CBOR Web Token (CWT) Claims
+    registry, https://www.iana.org/assignments/cwt/cwt.xhtml
 
   - Geohash, https://en.wikipedia.org/wiki/Geohash
 
