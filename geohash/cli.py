@@ -28,7 +28,7 @@ import argparse
 import logging
 import warnings
 
-from .geohash import geohash, geocode
+from ._core import geohash, geocode
 
 _logger = logging.getLogger(__name__)
 

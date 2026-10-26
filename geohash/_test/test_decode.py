@@ -1,7 +1,7 @@
 """Tests for geohash.geocode() input validation (issue #5)"""
 
 import pytest
-from geohash.geohash import geocode, geohash, distance
+from geohash._core import geocode, geohash, distance
 
 def test_geocode_uppercase():
     assert geocode("9MTZM4") == geocode("9mtzm4")

@@ -16,8 +16,8 @@ All tests are fast and self-contained: no credentials, no network, no
 downloaded data, and no environment variables. The whole suite runs in under
 a second, so there is only one tier and no `network` marker.
 
-`conftest.py` clears the in-memory memo of decoded codes kept by `geocode()`
-before each test, so tests do not depend on the order they run in.
+`conftest.py` clears the bounded in-memory memo of decoded codes kept by
+`geocode()` before each test, so tests do not depend on the order they run in.
 
 test_roundtrip.py
 -----------------
@@ -25,8 +25,8 @@ test_roundtrip.py
 Encode/decode round trips at precisions 1 to 12 for several points; known
 reference vectors (`9mtzm4`, `ezs42`, `u4pruydqqvj`); the encoded point lies
 inside the decoded cell; cell sizes per precision; code prefixes are the
-enclosing cells; uppercase codes; `nearest2()` on an empty list and on entries
-with extra fields.
+enclosing cells; uppercase codes; `nearest_latlon()` on an empty list and on
+entries with extra fields.
 
 	pytest geohash/_test/test_roundtrip.py
 
@@ -64,9 +64,20 @@ test_distance.py
 ----------------
 
 Distances in km: `haversine_distance()` against known distances, and
-`distance()`, `nearest()` and `nearest2()` against `haversine_distance()`.
+`distance()`, `nearest()` and `nearest_latlon()` against `haversine_distance()`.
 
 	pytest geohash/_test/test_distance.py
+
+test_api.py
+-----------
+
+The public API (issue #13): `geohash.__all__`, that `geohash.geohash` is the
+function and no submodule shadows it, that `nearest2()` and `distance2()` are
+gone, the bounded `geocode()` memo, the `nearest()` and `nearest_latlon()`
+result shapes (including empty lists), and type annotations on public
+functions.
+
+	pytest geohash/_test/test_api.py
 
 test_cli.py
 -----------
@@ -80,7 +91,7 @@ exit codes (0 ok, 1 syntax error, 9 exception), `--debug`, `--warning`,
 test_docs.py
 ------------
 
-Runs the `>>>` examples in the docstrings of `geohash`, `geohash.geohash`
+Runs the `>>>` examples in the docstrings of `geohash`, `geohash._core`
 and `geohash.cli` with `doctest`, so the documented output stays real.
 
 	pytest geohash/_test/test_docs.py

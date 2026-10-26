@@ -31,6 +31,16 @@ No sibling Eudoxys dependencies; no `cache` package; nothing is downloaded.
 
 ## Core conventions
 
+- The implementation is in the private module `geohash/_core.py`; the
+  public API is what `geohash/__init__.py` lists in `__all__`, and pdoc
+  documents those names on the package page. `geohash.geohash` is the
+  function, not a module. Add a public name to both the import and
+  `__all__` (and to `PUBLIC` in `_test/test_api.py`).
+- `nearest()` searches codes and returns a code (or `(code, km)`);
+  `nearest_latlon()` searches positions and returns `(index, entry, km)`.
+  Empty lists give `None`/`(None, nan)` and `(None, None, nan)`.
+- `geocode()` memoizes through `functools.lru_cache` on `_core._geocode`,
+  bounded by `GEOCODE_CACHE_SIZE`; tests clear it in `_test/conftest.py`.
 - Latitude and longitude are in degrees (north and east positive);
   distances are in km on a sphere of radius `EARTH_RADIUS_KM` (6371.0,
   mean Earth radius).
@@ -71,20 +81,10 @@ examples, so example output must stay exact.
 
 ## Known rough edges (don't "fix" silently; mention or ask)
 
-- `from .geohash import geohash` in `__init__.py` shadows the
-  `geohash.geohash` submodule with the function; the module is reached via
-  `importlib.import_module("geohash.geohash")` (see `_test/conftest.py`).
-  Tracked in #13.
-- `distance2()` and `haversine_distance()` are public names but not
-  re-exported; `nearest()` and `nearest2()` return different shapes, and
-  `nearest2((lat,lon), [])` returns index `0` with `None`. Tracked in #13.
-- `geocode()` memoizes every decoded code in the module-level `_cache` dict
-  without bound (documented in "What is not promised"). Tracked in #13.
 - `geocode()` discards the error margins `_decode()` computes, and the CLI
   prints full float precision by default. Tracked in #14.
 - `cli.py` sets argparse's private `_negative_number_matcher` so negative
   `LAT,LON` arguments are positional; check it on new Python versions.
-- Dead commented-out formatting code remains in `geocode()`.
 
 ## Working rules
 

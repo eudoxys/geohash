@@ -34,7 +34,7 @@ import random
 
 import pytest
 
-from geohash.geohash import geohash, geocode, _decode
+from geohash._core import geohash, geocode, _decode
 
 ALPHABET = "0123456789bcdefghjkmnpqrstuvwxyz"
 
