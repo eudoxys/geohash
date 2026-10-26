@@ -33,8 +33,11 @@ from .geohash import geohash, geocode
 _logger = logging.getLogger(__name__)
 
 E_OK = 0
+"""Exit code: ok"""
 E_SYNTAX = 1
+"""Exit code: syntax error, including no arguments and precision less than 1"""
 E_EXCEPTION = 9
+"""Exit code: exception caught (use `--debug` to see the traceback)"""
 
 # an argument that looks like a negative LAT,LON (e.g. -32.2,115.4); it is a
 # location, not an option (geohash codes never contain a comma)

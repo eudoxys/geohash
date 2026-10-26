@@ -65,3 +65,11 @@ exit codes (0 ok, 1 syntax error, 9 exception), `--debug`, `--warning`,
 `--help`, and LAT,LON argument validation.
 
 	pytest geohash/_test/test_cli.py
+
+test_docs.py
+------------
+
+Runs the `>>>` examples in the docstrings of `geohash`, `geohash.geohash`
+and `geohash.cli` with `doctest`, so the documented output stays real.
+
+	pytest geohash/_test/test_docs.py

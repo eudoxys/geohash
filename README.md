@@ -1,4 +1,18 @@
 [![Validation](https://github.com/eudoxys/geohash/actions/workflows/validate.yaml/badge.svg)](https://github.com/eudoxys/geohash/actions/workflows/validate.yaml)
+[![Documentation](https://github.com/eudoxys/geohash/actions/workflows/deploy-pages.yaml/badge.svg)](https://github.com/eudoxys/geohash/actions/workflows/deploy-pages.yaml)
+
+Eudoxys geohash tools
+
+`geohash` encodes latitude/longitude positions as geohash codes and decodes
+codes back to the latitude and longitude of their cell centers, following
+standard CTA-5009. It also gives great-circle distances in km between codes
+and finds the nearest code or position in a list. It provides a `geohash`
+command and a Python API for anyone who needs compact, prefix-nested location
+keys, and has no third-party dependencies.
+
+# Documentation
+
+See https://www.eudoxys.com/geohash
 
 # Installation
 
@@ -13,68 +27,63 @@ Install using `pip`:
 
 Note: the name `geohash` on PyPI belongs to an unrelated package, so
 `pip install geohash` without the URL installs the wrong package.
-    
-# Geohash tool
 
-Syntax: geohash [OPTIONS ...] CODE|LAT,LON [CODE|LAT,LON ...]
+# Maintenance
 
-## Options
+## Update docs
 
-    -d|--debug: enable debug logging and traceback output on exceptions
-    -f|--format FORMAT: set lat/lon output format (default `{lat},{lon}`)
-    -h|--help: output this help
-    -p|--precision PRECISION: set geohash string length (default 6)
-    -w|--warning: enable warning messages from python
+    make docs
 
-Options apply to all arguments wherever they appear, and may also be given as
-`--option=VALUE` or `-o=VALUE`.
+This builds the pdoc site in `docs/` (not committed). The
+[Documentation](.github/workflows/deploy-pages.yaml) workflow publishes it to
+https://www.eudoxys.com/geohash on each push to `main` that changes the
+package code.
 
-Each CODE or LAT,LON tuple is converted to its corresponding LAT,LON or CODE
-respectively and output, line by line.
-CODE is case-insensitive. A CODE that is empty or contains a character
-outside the geohash alphabet `0123456789bcdefghjkmnpqrstuvwxyz` is
-reported as a `ValueError` (exit code 9).
-A LAT,LON must be exactly two numbers separated by a comma, with latitude
-in [-90, 90] and longitude in [-180, 180] (coordinates are not wrapped);
-anything else is reported as a `ValueError` (exit code 9). PRECISION must
-be at least 1 (syntax error otherwise).
+## Run tests
 
-The geohash tools conform to standard CTA-5009.
+    pip install -e . pytest
+    pytest
 
-## Exit codes
+The tests need no credentials, network, or downloads, and run in under a
+second. See [geohash/_test/README.md](geohash/_test/README.md) for what each
+test file checks.
 
-    0: Ok
-    1: Syntax error (including no arguments)
-    9: Exception caught (use --debug to see traceback)
+# Examples
 
-# Example
-
-The following command:
+## Command line
 
     geohash 9mtzm4 32.225646,-115.43884
 
-gives the following output
+prints
 
     9mtzm4=32.22564697265625,-115.4388427734375
     32.225646,-115.43884=9mtzm4
 
-The following command:
+and
 
     geohash -p 8 -f "{lat:.4f},{lon:.4f}" 32.225646,-115.43884 9mtzm4
 
-gives the following output
+prints
 
     32.225646,-115.43884=9mtzm4kp
     9mtzm4=32.2256,-115.4388
 
-  
+Run `geohash --help` for all options and exit codes.
 
-# Testing
+## Python
 
-    pip install . pytest
-    pytest
+    from geohash import geohash, geocode, distance, nearest
+    print(geohash(32.225646, -115.43884))
+    print(geocode("9mtzm4"))
+    print(round(distance("9q8yyk", "dr5reg"), 1))  # km
+    print(nearest("9q8yyk", ["dr5reg", "9q5ctr", "c23nb6"], withdist=True))
 
-See [geohash/_test/README.md](geohash/_test/README.md) for what each test file checks.
+prints
+
+    9mtzm4
+    (32.22564697265625, -115.4388427734375)
+    4128.5
+    ('9q5ctr', 558.749145533643)
 
 # Acknowledgments
 
