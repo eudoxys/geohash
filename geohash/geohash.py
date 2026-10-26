@@ -153,8 +153,23 @@ def geohash(latitude, longitude, precision=6):
             ch = 0
     return ''.join(gh)
 
+EARTH_RADIUS_KM = 6371.0
+"""Earth radius in km used for great-circle distances. This is an
+assumption: the IUGG mean Earth radius, treating the Earth as a sphere.
+Distances computed with it can differ from ellipsoidal (geodesic)
+distances by up to about 0.5%. For a different radius `R`, multiply the
+result by `R / EARTH_RADIUS_KM`."""
+
 def distance(a,b):
-    """Get the distance between to geohashes"""
+    """Get the great-circle distance in km between two geohashes.
+
+    Each geohash is decoded to the center of its cell (see `geocode()`)
+    and the distance is computed by `haversine_distance()` using
+    `EARTH_RADIUS_KM`.
+
+    Example: `distance("9q8yyk", "dr5reg")` (San Francisco to New York)
+    returns about 4130 km.
+    """
     lat1,lon1 = geocode(a)
     lat2,lon2 = geocode(b)
     return haversine_distance(lat1, lon1, lat2, lon2)
@@ -169,7 +184,9 @@ def distance2(a,b):
 
 def haversine_distance(lat1, lon1, lat2, lon2):
     '''
-    Returns the great-circle distance between two point in meters
+    Returns the great-circle distance in km between two points given as
+    latitude and longitude in degrees, using the haversine formula on a
+    sphere of radius `EARTH_RADIUS_KM`.
     '''
     phi1 = lat1 * math.pi/180
     phi2 = lat2 * math.pi/180
@@ -179,17 +196,29 @@ def haversine_distance(lat1, lon1, lat2, lon2):
          + math.cos(phi1) * math.cos(phi2)
          * math.sin(delta_lam/2) * math.sin(delta_lam/2))
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    return c * 6378.1 # radius of earth in km
+    return c * EARTH_RADIUS_KM
 
 def nearest(gh,ghlist,withdist=False):
-    """Find the nearest geohash in a list of geohashes"""
+    """Find the nearest geohash in a list of geohashes.
+
+    Returns the nearest geohash in `ghlist`, or `None` if `ghlist` is
+    empty. If `withdist` is true, returns a tuple of the nearest geohash
+    and its great-circle distance in km from `gh` (see `distance()`), or
+    `(None, nan)` if `ghlist` is empty.
+    """
     if len(ghlist) > 0:
         best = min(((x,distance(gh,x)) for x in ghlist),key=lambda y:y[1])
         return best if withdist else best[0]
     return (None,float('nan')) if withdist else None
 
 def nearest2(test_latlon, latlonlist):
-    """Find the nearest lat/lon in a list of lat/lons"""
+    """Find the nearest lat/lon in a list of lat/lons.
+
+    Returns a tuple of the index of the nearest entry in `latlonlist`, the
+    entry itself, and its great-circle distance in km from `test_latlon`
+    (see `haversine_distance()`). If `latlonlist` is empty, returns
+    `(0, None, inf)`.
+    """
     test_lat, test_lon = test_latlon
     best_ix = 0
     best_dist = math.inf
