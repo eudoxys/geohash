@@ -1,8 +1,13 @@
 # Installation
 
-Install using pip (python installer):
+Install using Eudoxys Package Manager:
 
-    pip install git+https://github.com/eudoxys.com/geohash
+    pip install --upgrade git+https://github.com/eudoxys/epm
+    epm install geohash
+
+Install using `pip`:
+
+    pip install git+https://github.com/eudoxys/geohash
     
 # Geohash tool
 
