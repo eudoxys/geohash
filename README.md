@@ -8,6 +8,9 @@ Install using Eudoxys Package Manager:
 Install using `pip`:
 
     pip install git+https://github.com/eudoxys/geohash
+
+Note: the name `geohash` on PyPI belongs to an unrelated package, so
+`pip install geohash` without the URL installs the wrong package.
     
 # Geohash tool
 

@@ -52,5 +52,11 @@ gives the following output
     9mtzm4=32.2256,-115.4388
 """
 
+try:
+    import importlib.metadata
+    __version__ = importlib.metadata.version("geohash")
+except Exception: # pylint: disable=broad-exception-caught
+    __version__ = "dev"
+
 from .geohash import geohash,geocode,nearest,nearest2,distance
 from .cli import main
