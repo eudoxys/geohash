@@ -70,7 +70,7 @@ def test_main_exception_returns_9(capsys):
     assert main(["9mtzma"]) == 9
     out = capsys.readouterr()
     assert out.out == ""
-    assert out.err.startswith("ERROR [geohash]: KeyError")
+    assert out.err.startswith("ERROR [geohash]: ValueError invalid geohash character 'a'")
     assert len(out.err.strip().split("\n")) == 1
 
 def test_main_bad_format_returns_9(capsys):
@@ -82,17 +82,21 @@ def test_main_help_word_is_not_an_option(capsys):
 
 @pytest.mark.parametrize("flag",["-d","--debug"])
 def test_main_debug_raises(flag):
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         main([flag,"9mtzma"])
 
 def test_main_debug_after_code_raises():
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         main(["9mtzma","--debug"])
 
 def test_main_debug_does_not_persist():
-    with pytest.raises(KeyError):
+    with pytest.raises(ValueError):
         main(["--debug","9mtzma"])
     assert main(["9mtzma"]) == 9
+
+def test_main_uppercase_code(capsys):
+    assert main([CODE.upper()]) == 0
+    assert capsys.readouterr().out == CODE_OUT.replace(CODE,CODE.upper(),1)
 
 @pytest.mark.parametrize("flag",["-w","--warning"])
 def test_main_warning(capsys,flag):
