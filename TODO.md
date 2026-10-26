@@ -27,4 +27,4 @@
 
 # Release
 
-- [ ] Release 26.10.0 per the eudoxys-package checklist (#15)
+- [x] Release 26.10.0 per the eudoxys-package checklist (#15)

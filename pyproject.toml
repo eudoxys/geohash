@@ -16,7 +16,7 @@ dependencies = {file=["requirements.txt"]}
 
 [project]
 name = "geohash"
-version = "0.0.1"
+version = "26.10.0"
 description = "Eudoxys geohash tools"
 authors = [
     { name = "David P. Chassin", email = "dchassin@eudoxys.com" }
