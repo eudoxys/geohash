@@ -2,7 +2,7 @@
 
 Install using Eudoxys Package Manager:
 
-    pip install --upgrade git+https://github.com/eudoxys/epm
+    pip install --upgrade eudoxys
     epm install geohash
 
 Install using `pip`:
