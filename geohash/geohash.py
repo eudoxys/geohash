@@ -7,23 +7,41 @@ import math
 #
 _cache = {}
 
+_BASE32 = '0123456789bcdefghjkmnpqrstuvwxyz'
+_DECODEMAP = {c:i for i,c in enumerate(_BASE32)}
+
+def _normalize(gh):
+    """Return the geohash `gh` in lowercase after checking that it is a
+    non-empty string of geohash base32 characters. Raises `TypeError` if
+    `gh` is not a string and `ValueError` if it is empty or contains a
+    character outside `0123456789bcdefghjkmnpqrstuvwxyz` (case-insensitive).
+    """
+    if not isinstance(gh,str):
+        raise TypeError(f"geohash must be a str, not {type(gh).__name__}")
+    if not gh:
+        raise ValueError("geohash is empty")
+    code = gh.lower()
+    for pos,c in enumerate(code):
+        if c not in _DECODEMAP:
+            raise ValueError(f"invalid geohash character {gh[pos]!r} "
+                f"at position {pos} in {gh!r}")
+    return code
+
 def _decode(gh):
     """
     Decode the geohash to its exact values, including the error
     margins of the result.  Returns four float values: latitude,
     longitude, the plus/minus error for latitude (as a positive
     number) and the plus/minus error for longitude (as a positive
-    number).
+    number). Raises `ValueError` if `gh` is not a valid geohash
+    (see `_normalize()`).
     """
-    __base32 = '0123456789bcdefghjkmnpqrstuvwxyz'
-    __decodemap = { }
-    for i,c in enumerate(__base32):
-        __decodemap[c] = i
+    gh = _normalize(gh)
     lat_interval, lon_interval = (-90.0, 90.0), (-180.0, 180.0)
     lat_err, lon_err = 90.0, 180.0
     is_even = True
     for c in gh:
-        cd = __decodemap[c]
+        cd = _DECODEMAP[c]
         for mask in [16, 8, 4, 2, 1]:
             if is_even: # adds longitude info
                 lon_err /= 2
@@ -46,7 +64,17 @@ def geocode(gh):
     """
     Decode geohash, returning two strings with latitude and longitude
     containing only relevant digits and with trailing zeroes removed.
+
+    Geohashes are case-insensitive, e.g., `geocode("9MTZM4")` and
+    `geocode("9mtzm4")` return the same location.
+
+    Raises `ValueError` if `gh` is empty or contains a character that
+    is not in the geohash base32 alphabet
+    `0123456789bcdefghjkmnpqrstuvwxyz` (i.e., `a`, `i`, `l`, `o`, and
+    any non-alphanumeric character), and `TypeError` if `gh` is not a
+    string.
     """
+    gh = _normalize(gh)
     if gh in _cache:
         return _cache[gh][0],_cache[gh][1]
     lat, lon, _, _ = _decode(gh)

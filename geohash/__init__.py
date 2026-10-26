@@ -15,6 +15,9 @@ Options apply to all arguments wherever they appear, and may also be given as
 
 Each CODE or LAT,LON tuple is converted to its corresponding LAT,LON or CODE
 respectively and output, line by line.
+CODE is case-insensitive. A CODE that is empty or contains a character
+outside the geohash alphabet `0123456789bcdefghjkmnpqrstuvwxyz` is
+reported as a `ValueError` (exit code 9).
 
 The geohash tools conform to standard CTA-5009.
 
