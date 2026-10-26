@@ -29,6 +29,10 @@ respectively and output, line by line.
 CODE is case-insensitive. A CODE that is empty or contains a character
 outside the geohash alphabet `0123456789bcdefghjkmnpqrstuvwxyz` is
 reported as a `ValueError` (exit code 9).
+A LAT,LON must be exactly two numbers separated by a comma, with latitude
+in [-90, 90] and longitude in [-180, 180] (coordinates are not wrapped);
+anything else is reported as a `ValueError` (exit code 9). PRECISION must
+be at least 1 (syntax error otherwise).
 
 The geohash tools conform to standard CTA-5009.
 

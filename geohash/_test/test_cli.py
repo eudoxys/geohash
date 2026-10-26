@@ -107,3 +107,35 @@ def test_main_does_not_change_warning_filters():
     before = list(warnings.filters)
     main([CODE])
     assert warnings.filters == before
+
+# LAT,LON validation (issue #6)
+
+@pytest.mark.parametrize("arg",[
+    "32.2,-115.4,1","-32.2,-115.4,1","32.2,abc","32.2,","32.2,,1",",1","1,2,",
+    ])
+def test_main_malformed_latlon(capsys,arg):
+    assert main([arg]) == 9
+    out = capsys.readouterr()
+    assert out.out == ""
+    assert out.err == f"ERROR [geohash]: ValueError invalid LAT,LON {arg!r}: " \
+        "expected two numbers separated by a comma\n"
+
+@pytest.mark.parametrize("arg",["95,200","-95,0","0,-180.5","nan,0","0,inf"])
+def test_main_latlon_out_of_range(capsys,arg):
+    assert main([arg]) == 9
+    out = capsys.readouterr()
+    assert out.out == ""
+    assert out.err.startswith("ERROR [geohash]: ValueError ")
+    assert "outside" in out.err
+
+@pytest.mark.parametrize("arg,code",[
+    ("90,180","zzzzzz"),("-90,-180","000000"),("+32.225646,-115.43884","9mtzm4"),
+    ("32.225646, -115.43884","9mtzm4"),("-.5,-.5","7zzths"),
+    ])
+def test_main_latlon_accepted(capsys,arg,code):
+    assert main([arg]) == 0
+    assert capsys.readouterr().out == f"{arg}={code}\n"
+
+def test_main_malformed_latlon_debug_raises():
+    with pytest.raises(ValueError,match="invalid LAT,LON"):
+        main(["--debug","32.2,-115.4,1"])
