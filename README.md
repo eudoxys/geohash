@@ -11,11 +11,11 @@ and finds the nearest code or position in a list. It provides a `geohash`
 command and a Python API for anyone who needs compact, prefix-nested location
 keys, and has no third-party dependencies.
 
-# Documentation
+## Documentation
 
 See https://www.eudoxys.com/geohash
 
-# Installation
+## Installation
 
 Install using Eudoxys Package Manager:
 
@@ -29,9 +29,9 @@ Install using `pip`:
 Note: the name `geohash` on PyPI belongs to an unrelated package, so
 `pip install geohash` without the URL installs the wrong package.
 
-# Maintenance
+## Maintenance
 
-## Update docs
+### Update docs
 
     make docs
 
@@ -40,7 +40,7 @@ This builds the pdoc site in `docs/` (not committed). The
 https://www.eudoxys.com/geohash on each push to `main` that changes the
 package code.
 
-## Run tests
+### Run tests
 
     pip install -e . pytest
     pytest
@@ -49,9 +49,9 @@ The tests need no credentials, network, or downloads, and run in under a
 second. See [geohash/_test/README.md](geohash/_test/README.md) for what each
 test file checks.
 
-# Examples
+## Examples
 
-## Command line
+### Command line
 
     geohash 9mtzm4 32.225646,-115.43884
 
@@ -71,7 +71,7 @@ prints
 
 Run `geohash --help` for all options and exit codes.
 
-## Python
+### Python
 
     from geohash import geohash, geocode, distance, nearest
     print(geohash(32.225646, -115.43884))
@@ -86,6 +86,6 @@ prints
     4128.5
     ('9q5ctr', 558.749145533643)
 
-# Acknowledgments
+## Acknowledgments
 
-- This material is based on work supported by the U.S. Department of Energy’s Office of Electricity through a grant from the Grid Controls and Communications Division
+- This work was authored in part for the U.S. Department of Energy (DOE) by the National Laboratory of the Rockies under Contract No. DE-AC36-08GO28308 through a grant from the Grid Controls and Communications Devision and by Lawrence Livermore National Laboratory under Contract DE-AC52-07NA27344 through a grant from the Advanced Grid Modeling Program.
